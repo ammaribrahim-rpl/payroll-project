@@ -1,10 +1,9 @@
 <?php
-// app/Providers/AppServiceProvider.php
 
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Routing\Router; // Tambahkan ini
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,9 +18,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(Router $router): void // Inject Router
+    public function boot(): void
     {
-        $router->aliasMiddleware('isAdmin', \App\Http\Middleware\AdminMiddleware::class);
-        $router->aliasMiddleware('isKaryawan', \App\Http\Middleware\KaryawanMiddleware::class);
+        // Registrasi middleware alias
+        Route::aliasMiddleware('isAdmin', \App\Http\Middleware\AdminMiddleware::class);
+        Route::aliasMiddleware('isKaryawan', \App\Http\Middleware\KaryawanMiddleware::class);
     }
 }

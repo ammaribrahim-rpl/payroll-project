@@ -1,17 +1,16 @@
 <?php
-// app/Models/User.php
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail; // Uncomment jika Anda menggunakan verifikasi email
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // Jika Anda menggunakan Sanctum
+use Illuminate\Support\Facades\Auth; // Pastikan ini di-import jika Anda menggunakan Auth di dalam model, meskipun tidak umum
 
-class User extends Authenticatable
+class User extends Authenticatable // implements MustVerifyEmail (jika pakai verifikasi email)
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -22,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // Pastikan 'role' ada di sini jika Anda mengisinya secara massal
+        'role',
+        'gaji_pokok',
     ];
 
     /**
@@ -36,38 +36,31 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    /**
-     * Relasi ke model Karyawan.
-     */
-    public function karyawan()
+    protected function casts(): array // Penamaan method yang benar adalah casts() bukan getCasts()
     {
-        return $this->hasOne(Karyawan::class);
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed', // Otomatis hashing password saat diset
+        ];
     }
 
-    /**
-     * Cek apakah user adalah admin.
-     *
-     * @return bool
-     */
-    public function isAdmin()
+    // Relasi ke Absensi
+    public function absensi()
+    {
+        return $this->hasMany(Absensi::class);
+    }
+
+    // Helper untuk cek role
+    public function isAdmin(): bool // Tambahkan return type hint untuk kejelasan
     {
         return $this->role === 'admin';
     }
 
-    /**
-     * Cek apakah user adalah karyawan.
-     *
-     * @return bool
-     */
-    public function isKaryawan() // <--- TAMBAHKAN METHOD INI
+    public function isKaryawan(): bool // Tambahkan return type hint untuk kejelasan
     {
         return $this->role === 'karyawan';
     }

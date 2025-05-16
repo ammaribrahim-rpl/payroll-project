@@ -10,9 +10,6 @@ use App\Http\Controllers\Admin\KaryawanController as AdminKaryawanController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\GajiController as AdminGajiController;
 
-Route::get('/', function () {
-    return view('welcome'); // Atau redirect ke login
-});
 
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

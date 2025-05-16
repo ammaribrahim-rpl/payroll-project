@@ -19,9 +19,11 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            
             if ($user->isAdmin()) {
                 return redirect()->intended(route('admin.dashboard')); // Buat route ini nanti
             }
