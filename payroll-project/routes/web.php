@@ -11,6 +11,10 @@ use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\GajiController as AdminGajiController;
 
 
+Route::get('/', function () {
+    return redirect('/login'); // Atau langsung redirect ke dashboard kalau sudah login
+});
+
 // Auth Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

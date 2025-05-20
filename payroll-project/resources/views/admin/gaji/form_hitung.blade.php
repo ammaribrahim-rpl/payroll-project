@@ -1,104 +1,83 @@
 @extends('layouts.app')
 
-@section('title', 'Hitung Gaji')
+@section('title', 'Hitung Gaji Karyawan')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Hitung Gaji Karyawan</h2>
+<div class="container">
+    <h3>Hitung Gaji Bulanan Karyawan</h3>
+    <hr>
 
     @if(session('hasil_perhitungan'))
-    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4">
-        <p class="font-bold">Hasil Perhitungan:</p>
-        <ul class="mt-2">
-            @foreach(session('hasil_perhitungan') as $hasil)
-                <li>
-                    {{ $hasil['karyawan'] }}: 
-                    @if($hasil['status'] === 'success')
-                        Berhasil (Gaji Bersih: Rp {{ number_format($hasil['gaji_bersih'], 0, ',', '.') }})
-                    @else
-                        {{ $hasil['message'] }}
-                    @endif
-                </li>
-            @endforeach
-        </ul>
-    </div>
+        <div class="alert alert-info">
+            <h5>Hasil Perhitungan Sebelumnya:</h5>
+            <ul>
+                @foreach(session('hasil_perhitungan') as $hasil)
+                    <li>
+                        Karyawan: {{ $hasil['karyawan'] }} - Status: <span class="fw-bold {{ $hasil['status'] == 'success' ? 'text-success' : ($hasil['status'] == 'skipped' ? 'text-warning' : 'text-danger') }}">{{ ucfirst($hasil['status']) }}</span>.
+                        @if(isset($hasil['gaji_bersih']))
+                            Gaji Bersih: Rp {{ number_format($hasil['gaji_bersih'], 0, ',', '.') }}.
+                        @endif
+                        Pesan: {{ $hasil['message'] }}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow p-6">
-        <form action="{{ route('admin.gaji.proses_hitung') }}" method="POST">
-            @csrf
-            
-            <div class="space-y-4">
-                <div>
-                    <label for="bulan" class="block text-sm font-medium text-gray-700">Bulan</label>
-                    <select name="bulan" id="bulan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('bulan') border-red-500 @enderror">
-                        <option value="">Pilih Bulan</option>
-                        @for($i = 1; $i <= 12; $i++)
-                            <option value="{{ $i }}" {{ old('bulan') == $i ? 'selected' : '' }}>
-                                {{ DateTime::createFromFormat('!m', $i)->format('F') }}
-                            </option>
-                        @endfor
-                    </select>
-                    @error('bulan')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
 
-                <div>
-                    <label for="tahun" class="block text-sm font-medium text-gray-700">Tahun</label>
-                    <select name="tahun" id="tahun" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('tahun') border-red-500 @enderror">
-                        <option value="">Pilih Tahun</option>
-                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                            <option value="{{ $y }}" {{ old('tahun', date('Y')) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
-                    @error('tahun')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+    <div class="card">
+        <div class="card-header">Form Perhitungan Gaji</div>
+        <div class="card-body">
+            <form action="{{ route('admin.gaji.proses_hitung') }}" method="POST">
+                @csrf
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="karyawan_id" class="form-label">Pilih Karyawan (Opsional)</label>
+                        <select name="karyawan_id" id="karyawan_id" class="form-select @error('karyawan_id') is-invalid @enderror">
+                            <option value="">Semua Karyawan Aktif</option>
+                            @foreach($karyawanList as $k)
+                                <option value="{{ $k->id }}" {{ old('karyawan_id') == $k->id ? 'selected' : '' }}>
+                                    {{ $k->user->name }} ({{ $k->nik }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="form-text text-muted">Jika tidak dipilih, gaji akan dihitung untuk semua karyawan.</small>
+                        @error('karyawan_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="bulan" class="form-label">Bulan <span class="text-danger">*</span></label>
+                        <select name="bulan" id="bulan" class="form-select @error('bulan') is-invalid @enderror" required>
+                            <option value="">Pilih Bulan</option>
+                            @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" {{ old('bulan', date('m')) == $i ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($i)->isoFormat('MMMM') }}</option>
+                            @endfor
+                        </select>
+                        @error('bulan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="tahun" class="form-label">Tahun <span class="text-danger">*</span></label>
+                        <input type="number" name="tahun" id="tahun" class="form-control @error('tahun') is-invalid @enderror" placeholder="YYYY" value="{{ old('tahun', date('Y')) }}" required min="2000" max="{{ date('Y') + 1 }}">
+                        @error('tahun') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
                 </div>
-
-                <div>
-                    <label for="karyawan_id" class="block text-sm font-medium text-gray-700">Karyawan</label>
-                    <select name="karyawan_id" id="karyawan_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('karyawan_id') border-red-500 @enderror">
-                        <option value="">Semua Karyawan</option>
-                        @foreach($karyawanList as $karyawan)
-                            <option value="{{ $karyawan->id }}" {{ old('karyawan_id') == $karyawan->id ? 'selected' : '' }}>
-                                {{ $karyawan->user->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('karyawan_id')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                <div class="mb-3">
+                    <label for="keterangan_gaji" class="form-label">Keterangan Tambahan (Opsional)</label>
+                    <textarea name="keterangan_gaji" id="keterangan_gaji" class="form-control @error('keterangan_gaji') is-invalid @enderror" rows="2">{{ old('keterangan_gaji') }}</textarea>
+                    @error('keterangan_gaji') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
-
-                <div>
-                    <label for="keterangan_gaji" class="block text-sm font-medium text-gray-700">Keterangan</label>
-                    <textarea name="keterangan_gaji" id="keterangan_gaji" rows="3" 
-                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('keterangan_gaji') border-red-500 @enderror">{{ old('keterangan_gaji', 'Perhitungan otomatis') }}</textarea>
-                    @error('keterangan_gaji')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="flex items-center">
-                    <input type="checkbox" name="force_recalculate" id="force_recalculate" 
-                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                    <label for="force_recalculate" class="ml-2 block text-sm text-gray-900">
-                        Hitung ulang untuk yang sudah ada
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="force_recalculate" name="force_recalculate" value="1" {{ old('force_recalculate') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="force_recalculate">
+                        Hitung Ulang Gaji (Jika sudah ada data gaji untuk periode ini, akan ditimpa)
                     </label>
                 </div>
-            </div>
 
-            <div class="mt-6 flex justify-end space-x-3">
-                <a href="{{ route('admin.gaji.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                    Batal
-                </a>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Hitung Gaji
-                </button>
-            </div>
-        </form>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-calculator-fill"></i> Proses Hitung Gaji</button>
+                    <a href="{{ route('admin.gaji.index') }}" class="btn btn-secondary">Kembali ke Histori Gaji</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

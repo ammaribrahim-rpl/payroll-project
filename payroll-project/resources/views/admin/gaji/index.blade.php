@@ -1,133 +1,95 @@
 @extends('layouts.app')
 
-@section('title', 'Data Gaji')
+@section('title', 'Manajemen Penggajian')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-gray-800">Data Gaji</h2>
-        <a href="{{ route('admin.gaji.form_hitung') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Hitung Gaji
-        </a>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Histori Penggajian</h3>
+        <a href="{{ route('admin.gaji.form_hitung') }}" class="btn btn-success"><i class="bi bi-calculator"></i> Hitung Gaji Baru</a>
     </div>
 
-    <!-- Filter Form -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <form method="GET" action="{{ route('admin.gaji.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label for="karyawan_id" class="block text-sm font-medium text-gray-700">Karyawan</label>
-                <select name="karyawan_id" id="karyawan_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="">Semua Karyawan</option>
-                    @foreach($karyawanList as $karyawan)
-                        <option value="{{ $karyawan->id }}" {{ request('karyawan_id') == $karyawan->id ? 'selected' : '' }}>
-                            {{ $karyawan->user->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
-                <label for="bulan" class="block text-sm font-medium text-gray-700">Bulan</label>
-                <select name="bulan" id="bulan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="">Pilih Bulan</option>
-                    @for($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>
-                            {{ DateTime::createFromFormat('!m', $i)->format('F') }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-
-            <div>
-                <label for="tahun" class="block text-sm font-medium text-gray-700">Tahun</label>
-                <select name="tahun" id="tahun" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="">Pilih Tahun</option>
-                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                        <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
-
-            <div class="flex items-end">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Filter
-                </button>
-            </div>
-        </form>
+    <div class="card mb-4">
+        <div class="card-header">Filter Histori Gaji</div>
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.gaji.index') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="karyawan_id" class="form-label">Pilih Karyawan (Opsional)</label>
+                        <select name="karyawan_id" id="karyawan_id" class="form-select">
+                            <option value="">Semua Karyawan</option>
+                            @foreach($karyawanList as $k)
+                                <option value="{{ $k->id }}" {{ request('karyawan_id') == $k->id ? 'selected' : '' }}>
+                                    {{ $k->user->name }} ({{ $k->nik }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="bulan" class="form-label">Bulan</label>
+                        <select name="bulan" id="bulan" class="form-select">
+                            <option value="">Semua Bulan</option>
+                            @for ($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}" {{ request('bulan') == $i ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($i)->isoFormat('MMMM') }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="tahun" class="form-label">Tahun</label>
+                        <input type="number" name="tahun" id="tahun" class="form-control" placeholder="YYYY" value="{{ request('tahun', date('Y')) }}" min="2000" max="{{ date('Y') + 1 }}">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> Filter</button>
+                         <a href="{{ route('admin.gaji.index') }}" class="btn btn-secondary w-100 mt-2"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- Tabel Gaji -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Periode
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Nama Karyawan
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Gaji Pokok
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Potongan
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Gaji Bersih
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aksi
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($gajiList as $gaji)
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {{ DateTime::createFromFormat('!m', $gaji->bulan)->format('F') }} {{ $gaji->tahun }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {{ $gaji->karyawan->user->name }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        Rp {{ number_format($gaji->potongan, 0, ',', '.') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap font-semibold">
-                        Rp {{ number_format($gaji->gaji_bersih, 0, ',', '.') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            {{ $gaji->tanggal_pembayaran ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                            {{ $gaji->tanggal_pembayaran ? 'Dibayar' : 'Pending' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <a href="{{ route('admin.gaji.slip', $gaji) }}" class="text-blue-600 hover:text-blue-900">
-                            Cetak Slip
-                        </a>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                        Belum ada data gaji
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="mt-4">
-        {{ $gajiList->appends(request()->query())->links() }}
+    <div class="card">
+        <div class="card-body">
+            @if($gajiList->isEmpty())
+                <div class="alert alert-info">Tidak ada data gaji yang cocok dengan filter Anda atau belum ada gaji yang dihitung.</div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Karyawan</th>
+                                <th>Periode</th>
+                                <th>Gaji Pokok</th>
+                                <th>Potongan</th>
+                                <th>Gaji Bersih</th>
+                                <th>Tgl. Pembayaran</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($gajiList as $index => $gaji)
+                            <tr>
+                                <td>{{ $gajiList->firstItem() + $index }}</td>
+                                <td>{{ $gaji->karyawan->user->name }}</td>
+                                <td>{{ \Carbon\Carbon::create()->month($gaji->bulan)->isoFormat('MMMM') }} {{ $gaji->tahun }}</td>
+                                <td>Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($gaji->potongan, 0, ',', '.') }}</td>
+                                <td class="fw-bold">Rp {{ number_format($gaji->gaji_bersih, 0, ',', '.') }}</td>
+                                <td>{{ $gaji->tanggal_pembayaran ? \Carbon\Carbon::parse($gaji->tanggal_pembayaran)->isoFormat('D MMM YYYY') : '-' }}</td>
+                                <td>
+                                    <a href="{{ route('admin.gaji.slip', $gaji->id) }}" class="btn btn-sm btn-info" title="Lihat Slip" target="_blank"><i class="bi bi-receipt"></i> Slip</a>
+                                    {{-- Tambahkan aksi lain jika perlu, misal edit status pembayaran --}}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    {{ $gajiList->appends(request()->query())->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

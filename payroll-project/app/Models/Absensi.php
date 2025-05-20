@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,8 +22,8 @@ class Absensi extends Model
 
     protected $casts = [
         'tanggal' => 'date',
-        // 'jam_masuk' => 'datetime:H:i:s', // Atau biarkan string jika hanya time
-        // 'jam_pulang' => 'datetime:H:i:s',
+        'jam_masuk' => 'datetime:H:i:s', // Atau biarkan string jika hanya time
+        'jam_pulang' => 'datetime:H:i:s',
     ];
 
     public function karyawan()

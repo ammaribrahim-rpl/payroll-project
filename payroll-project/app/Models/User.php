@@ -2,65 +2,43 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail; // Uncomment jika Anda menggunakan verifikasi email
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth; // Pastikan ini di-import jika Anda menggunakan Auth di dalam model, meskipun tidak umum
+use Laravel\Sanctum\HasApiTokens; // Jika menggunakan Sanctum
 
-class User extends Authenticatable // implements MustVerifyEmail (jika pakai verifikasi email)
+class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
-        'gaji_pokok',
+        'role', // Tambahkan role
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array // Penamaan method yang benar adalah casts() bukan getCasts()
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function karyawan()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed', // Otomatis hashing password saat diset
-        ];
+        return $this->hasOne(Karyawan::class);
     }
 
-    // Relasi ke Absensi
-    public function absensi()
-    {
-        return $this->hasMany(Absensi::class);
-    }
-
-    // Helper untuk cek role
-    public function isAdmin(): bool // Tambahkan return type hint untuk kejelasan
+    public function isAdmin()
     {
         return $this->role === 'admin';
     }
 
-    public function isKaryawan(): bool // Tambahkan return type hint untuk kejelasan
+    public function isKaryawan()
     {
         return $this->role === 'karyawan';
     }

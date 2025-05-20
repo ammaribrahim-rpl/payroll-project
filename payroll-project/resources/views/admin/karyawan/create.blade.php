@@ -1,119 +1,82 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Karyawan')
+@section('title', 'Tambah Karyawan Baru')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-800 mb-6">Tambah Karyawan Baru</h2>
-
-    <div class="bg-white rounded-lg shadow p-6">
-        <form action="{{ route('admin.karyawan.store') }}" method="POST">
-            @csrf
-            
-            <div class="space-y-4">
-                <!-- User Information -->
-                <h3 class="text-lg font-medium text-gray-900 mb-3">Informasi User</h3>
-                
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('name') border-red-500 @enderror">
-                    @error('name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+<div class="container">
+    <h3>Tambah Karyawan Baru</h3>
+    <hr>
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ route('admin.karyawan.store') }}" method="POST">
+                @csrf
+                <h5>Data User Login</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
+                        @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                        @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required>
+                    </div>
+                </div>
+                <hr>
+                <h5>Data Detail Karyawan</h5>
+                 <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nik" class="form-label">NIK <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik') }}" required>
+                        @error('nik') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label for="no_telepon" class="form-label">No. Telepon</label>
+                        <input type="text" class="form-control @error('no_telepon') is-invalid @enderror" id="no_telepon" name="no_telepon" value="{{ old('no_telepon') }}">
+                        @error('no_telepon') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="alamat" class="form-label">Alamat</label>
+                    <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" rows="3">{{ old('alamat') }}</textarea>
+                    @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                 <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="posisi" class="form-label">Posisi <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('posisi') is-invalid @enderror" id="posisi" name="posisi" value="{{ old('posisi') }}" required>
+                        @error('posisi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="tanggal_masuk" class="form-label">Tanggal Masuk <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control @error('tanggal_masuk') is-invalid @enderror" id="tanggal_masuk" name="tanggal_masuk" value="{{ old('tanggal_masuk') }}" required>
+                        @error('tanggal_masuk') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="gaji_pokok" class="form-label">Gaji Pokok (Rp) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control @error('gaji_pokok') is-invalid @enderror" id="gaji_pokok" name="gaji_pokok" value="{{ old('gaji_pokok') }}" required>
+                        @error('gaji_pokok') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
                 </div>
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" name="email" id="email" value="{{ old('email') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('email') border-red-500 @enderror">
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Simpan Karyawan</button>
+                    <a href="{{ route('admin.karyawan.index') }}" class="btn btn-secondary">Batal</a>
                 </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" name="password" id="password" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('password') border-red-500 @enderror">
-                    @error('password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation" id="password_confirmation" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <!-- Employee Information -->
-                <h3 class="text-lg font-medium text-gray-900 mb-3 mt-6">Informasi Karyawan</h3>
-
-                <div>
-                    <label for="nik" class="block text-sm font-medium text-gray-700">NIK</label>
-                    <input type="text" name="nik" id="nik" value="{{ old('nik') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('nik') border-red-500 @enderror">
-                    @error('nik')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
-                    <textarea name="alamat" id="alamat" rows="3" 
-                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('alamat') border-red-500 @enderror">{{ old('alamat') }}</textarea>
-                    @error('alamat')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="no_telepon" class="block text-sm font-medium text-gray-700">No. Telepon</label>
-                    <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('no_telepon') border-red-500 @enderror">
-                    @error('no_telepon')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="posisi" class="block text-sm font-medium text-gray-700">Posisi</label>
-                    <input type="text" name="posisi" id="posisi" value="{{ old('posisi') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('posisi') border-red-500 @enderror">
-                    @error('posisi')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="tanggal_masuk" class="block text-sm font-medium text-gray-700">Tanggal Masuk</label>
-                    <input type="date" name="tanggal_masuk" id="tanggal_masuk" value="{{ old('tanggal_masuk') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('tanggal_masuk') border-red-500 @enderror">
-                    @error('tanggal_masuk')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label for="gaji_pokok" class="block text-sm font-medium text-gray-700">Gaji Pokok</label>
-                    <input type="number" name="gaji_pokok" id="gaji_pokok" value="{{ old('gaji_pokok') }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('gaji_pokok') border-red-500 @enderror">
-                    @error('gaji_pokok')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-3">
-                <a href="{{ route('admin.karyawan.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
-                    Batal
-                </a>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                    Simpan
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

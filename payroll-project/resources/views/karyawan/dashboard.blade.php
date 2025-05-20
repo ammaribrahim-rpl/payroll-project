@@ -1,106 +1,68 @@
-karyawan/dashboard.blade.php
 @extends('layouts.app')
 
 @section('title', 'Dashboard Karyawan')
 
 @section('content')
-<div class="space-y-6">
-    <h2 class="text-2xl font-bold text-gray-800">Dashboard Karyawan</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Absensi Hari Ini -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Absensi Hari Ini</h3>
-            
-            @php
-                $absensiHariIni = Auth::user()->karyawan->absensi()
-                    ->whereDate('tanggal', today())
-                    ->first();
-            @endphp
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Selamat Datang, {{ Auth::user()->name }}!</h4>
+                </div>
 
-            <div class="space-y-4">
-                @if(!$absensiHariIni || !$absensiHariIni->jam_masuk)
-                    <form action="{{ route('karyawan.absensi.masuk') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                            Presensi Masuk
-                        </button>
-                    </form>
-                @else
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                        Anda sudah presensi masuk pukul {{ $absensiHariIni->jam_masuk }}
+                <div class="card-body">
+                    @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    <h5>Presensi Hari Ini ({{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }})</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            @php
+                                $karyawan = Auth::user()->karyawan;
+                                $absensiHariIni = $karyawan ? $karyawan->absensi()->whereDate('tanggal', today())->first() : null;
+                            @endphp
+
+                            @if (!$absensiHariIni || !$absensiHariIni->jam_masuk)
+                                <form method="POST" action="{{ route('karyawan.absensi.masuk') }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-box-arrow-in-right"></i> Presensi Masuk
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" class="btn btn-success w-100" disabled>
+                                    <i class="bi bi-check-circle"></i> Sudah Presensi Masuk ({{ \Carbon\Carbon::parse($absensiHariIni->jam_masuk)->format('H:i') }})
+                                </button>
+                            @endif
+                        </div>
+                        <div class="col-md-6 mb-3">
+                             @if ($absensiHariIni && $absensiHariIni->jam_masuk && !$absensiHariIni->jam_pulang)
+                                <form method="POST" action="{{ route('karyawan.absensi.pulang') }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="bi bi-box-arrow-left"></i> Presensi Pulang
+                                    </button>
+                                </form>
+                            @elseif($absensiHariIni && $absensiHariIni->jam_pulang)
+                                <button type="button" class="btn btn-danger w-100" disabled>
+                                     <i class="bi bi-check-circle"></i> Sudah Presensi Pulang ({{ \Carbon\Carbon::parse($absensiHariIni->jam_pulang)->format('H:i') }})
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-secondary w-100" disabled>
+                                    Presensi Pulang (Belum Masuk)
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                @endif
+                    <hr>
+                    <a href="{{ route('karyawan.absensi.riwayat') }}" class="btn btn-info"><i class="bi bi-clock-history"></i> Lihat Riwayat Absensi Saya</a>
 
-                @if($absensiHariIni && $absensiHariIni->jam_masuk && !$absensiHariIni->jam_pulang)
-                    <form action="{{ route('karyawan.absensi.pulang') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                            Presensi Pulang
-                        </button>
-                    </form>
-                @elseif($absensiHariIni && $absensiHariIni->jam_pulang)
-                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
-                        Anda sudah presensi pulang pukul {{ $absensiHariIni->jam_pulang }}
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Info Pribadi -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pribadi</h3>
-            <dl class="space-y-3">
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">NIK</dt>
-                    <dd class="text-base text-gray-900">{{ Auth::user()->karyawan->nik }}</dd>
                 </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Posisi</dt>
-                    <dd class="text-base text-gray-900">{{ Auth::user()->karyawan->posisi }}</dd>
-                </div>
-                <div>
-                    <dt class="text-sm font-medium text-gray-500">Tanggal Bergabung</dt>
-                    <dd class="text-base text-gray-900">{{ Auth::user()->karyawan->tanggal_masuk->format('d M Y') }}</dd>
-                </div>
-            </dl>
-        </div>
-    </div>
-
-    <!-- Statistik Absensi Bulan Ini -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Statistik Absensi Bulan Ini</h3>
-        
-        @php
-            $absensi = Auth::user()->karyawan->absensi()
-                ->whereMonth('tanggal', now()->month)
-                ->whereYear('tanggal', now()->year)
-                ->get();
-            
-            $statistics = [
-                'hadir' => $absensi->where('status', 'hadir')->count(),
-                'izin' => $absensi->where('status', 'izin')->count(),
-                'sakit' => $absensi->where('status', 'sakit')->count(),
-                'tanpa_keterangan' => $absensi->where('status', 'tanpa_keterangan')->count(),
-            ];
-        @endphp
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center">
-                <p class="text-2xl font-bold text-green-600">{{ $statistics['hadir'] }}</p>
-                <p class="text-sm text-gray-600">Hadir</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl font-bold text-yellow-600">{{ $statistics['izin'] }}</p>
-                <p class="text-sm text-gray-600">Izin</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl font-bold text-blue-600">{{ $statistics['sakit'] }}</p>
-                <p class="text-sm text-gray-600">Sakit</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl font-bold text-red-600">{{ $statistics['tanpa_keterangan'] }}</p>
-                <p class="text-sm text-gray-600">Tanpa Keterangan</p>
             </div>
         </div>
     </div>
