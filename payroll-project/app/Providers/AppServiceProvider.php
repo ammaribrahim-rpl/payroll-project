@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Registrasi middleware alias
-        Route::aliasMiddleware('isAdmin', \App\Http\Middleware\AdminMiddleware::class);
-        Route::aliasMiddleware('isKaryawan', \App\Http\Middleware\KaryawanMiddleware::class);
+        Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
+        Route::aliasMiddleware('karyawan', \App\Http\Middleware\KaryawanMiddleware::class);
     }
 }

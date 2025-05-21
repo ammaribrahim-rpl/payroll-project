@@ -24,8 +24,8 @@ class LoginController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
             
-            if ($user->isAdmin()) {
-                return redirect()->intended(route('admin.dashboard')); // Buat route ini nanti
+            if ($user->isAdmin()) { // <-- DI SINI
+                return redirect()->intended(route('admin.dashboard'));
             }
             return redirect()->intended(route('karyawan.dashboard')); // Buat route ini nanti
         }
